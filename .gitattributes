@@ -1,0 +1,49 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicity text files
+*.java text eol=lf
+*.xtend text eol=lf
+*.groovy text eol=lf
+*.vm text eol=lf
+*.xtext text eol=lf
+*.xml text eol=lf
+*.xsd text eol=lf
+*.mwe2 text eol=lf
+*.ecore text eol=lf
+*.genmodel text eol=lf
+*.gradle text eol=lf
+*.properties text eol=lf
+*.MF text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+*.scss text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.sql text eol=lf
+*.svg text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+
+
+# Binary files
+*.jar binary
+*.war binary
+*.ear binary
+*.png binary
+*.jpeg binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.doc binary
+*.xls binary
+*.gz binary
+*.pdf binary
+*.exe binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+
