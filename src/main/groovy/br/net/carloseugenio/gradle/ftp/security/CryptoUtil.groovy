@@ -1,4 +1,4 @@
-package org.engen.gradle.plugin.security
+package br.net.carloseugenio.gradle.ftp.security
 
 import groovy.transform.CompileStatic
 

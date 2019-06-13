@@ -2,24 +2,41 @@ plugins {
     id "com.jfrog.bintray" version "1.8.4"
     // Apply the groovy plugin to add support for Groovy
     id 'groovy'
-    id 'java-gradle-plugin'
+	// This gives problems with SF4J dependencies bundled in API
+    //id 'java-gradle-plugin'
     id 'ivy-publish'
     id "maven-publish"
+	id 'java-gradle-plugin'
+	id 'idea'
 }
 
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+	// For the Gradle tooling api
+	maven {
+		url 'https://repo.gradle.org/gradle/repo'
+	}
 }
 
 dependencies {
+	//compileOnly gradleApi()
+	implementation gradleApi()
+
     // Use the latest Groovy version for building this library
     implementation 'org.codehaus.groovy:groovy-all:2.5.6'
     // FTP Client library
     implementation 'commons-net:commons-net:3.3'
+
+	testImplementation gradleTestKit()
+
     // Use the awesome Spock testing and specification framework
-    testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+    //testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+	// Mock the FTP Server
+	testImplementation 'org.mockftpserver:MockFtpServer:2.7.1'
+
+	testCompile 'junit:junit:4.12'
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
@@ -70,7 +87,7 @@ publishing {
                 classifier "javadoc"
             }
             groupId 'br.net.carloseugenio.gradle'
-            artifactId 'gradle-ftp'
+            artifactId 'ftp'
             version '0.0.1'
             pom.withXml {
                 def root = asNode()

@@ -1,4 +1,4 @@
-package org.engen.gradle.plugin
+package br.net.carloseugenio.gradle.ftp
 
 import org.gradle.api.NamedDomainObjectContainer
 

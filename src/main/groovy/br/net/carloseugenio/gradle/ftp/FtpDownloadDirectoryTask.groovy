@@ -1,10 +1,10 @@
-package org.engen.gradle.plugin
+package br.net.carloseugenio.gradle.ftp
+
 
 import groovy.transform.CompileStatic
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPSClient
-import org.engen.gradle.plugin.security.CryptoUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
@@ -18,7 +18,7 @@ class FtpDownloadDirectoryTask extends DefaultTask {
     void executeTask() {
 
         // Load the password from secured file
-        serverInfo.password = CryptoUtil.loadPassword(serverInfo.username)
+        serverInfo.password = br.net.carloseugenio.gradle.ftp.security.CryptoUtil.loadPassword(serverInfo.username)
 
         FtpClientHelper helper = new FtpClientHelper(serverInfo: serverInfo)
 

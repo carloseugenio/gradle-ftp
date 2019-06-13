@@ -1,7 +1,7 @@
-package org.engen.gradle.plugin.security
+package br.net.carloseugenio.gradle.ftp.security
 
 import groovy.transform.CompileStatic
-import org.engen.gradle.plugin.Server
+import br.net.carloseugenio.gradle.ftp.Server
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 

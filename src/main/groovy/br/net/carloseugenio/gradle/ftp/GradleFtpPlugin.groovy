@@ -1,13 +1,12 @@
-package org.engen.gradle.plugin
+package br.net.carloseugenio.gradle.ftp
 
 
-import org.engen.gradle.plugin.security.SecurePasswordTask
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 
-class GradleUtilsPlugin implements Plugin<Project> {
+class GradleFtpPlugin implements Plugin<Project> {
 
 	static final FTP_EXTENSION_NAME = "ftp"
 	private static final String DOWNLOAD_TASK_PATTERN = 'download%sFrom%s'
@@ -92,7 +91,7 @@ class GradleUtilsPlugin implements Plugin<Project> {
 						SECURE_SERVER_PASSWORD_PATTERN,
 						serverInfo.name.capitalize())
 
-		project.task(taskName, type: SecurePasswordTask) {
+		project.task(taskName, type: br.net.carloseugenio.gradle.ftp.security.SecurePasswordTask) {
 			description = "Create a secure user file password on disk to login on FTPServer: $serverInfo.name"
 			group = "Engen"
 			it.serverInfo = serverInfo
