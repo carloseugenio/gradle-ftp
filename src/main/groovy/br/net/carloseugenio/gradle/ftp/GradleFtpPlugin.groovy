@@ -12,7 +12,7 @@ class GradleFtpPlugin implements Plugin<Project> {
 	private static final String DOWNLOAD_TASK_PATTERN = 'download%sFrom%s'
     private static final String UPLOAD_TASK_PATTERN = 'upload%sTo%s'
 	private static final String SECURE_SERVER_PASSWORD_PATTERN = 'secure%sPassword'
-	private static final String TASK_GROUP_NAME = "Engen"
+	private static final String TASK_GROUP_NAME = "Gradle FTP Plugin"
 
     void apply(Project project) {
     	project.afterEvaluate {
@@ -23,7 +23,7 @@ class GradleFtpPlugin implements Plugin<Project> {
 			println "Found java in project ${project.name}"
 			project.tasks.create('printSourceSets', PrintSourceSetsTask) {
 				description = "Print all configured sourceSets for this project"
-				group = "Engen"
+				group = TASK_GROUP_NAME
 			}
 	    }
 		// The ftp util task and extension
@@ -93,7 +93,7 @@ class GradleFtpPlugin implements Plugin<Project> {
 
 		project.task(taskName, type: br.net.carloseugenio.gradle.ftp.security.SecurePasswordTask) {
 			description = "Create a secure user file password on disk to login on FTPServer: $serverInfo.name"
-			group = "Engen"
+			group = TASK_GROUP_NAME
 			it.serverInfo = serverInfo
 		}
 	}

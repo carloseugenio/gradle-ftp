@@ -87,7 +87,7 @@ class FtpDownloadTest {
 	}
 
 	@Test
-	void testWithBuildStream() {
+	void testTasksWithBuildStream() {
 		buildFile << """
             ftp {
 				FakeServer {
@@ -98,8 +98,8 @@ class FtpDownloadTest {
             
 					downloads {
 						files {
-							remoteDir = "/basic/SPO/SPO_AP_34826_PRO_MIDASWS2-ASSINCRONO/logs/app"
-							localDir = "build/asyncProd/logs"
+							remoteDir = "/"
+							localDir = "/"
 						}
 					}
 				}
@@ -113,8 +113,65 @@ class FtpDownloadTest {
 				.build()
 
 		log.quiet("Output: $result.output")
-		//result.output.contains("Successfully resolved URL 'https://www.google.com/'")
-		//result.task(":verifyUrl").outcome == SUCCESS
+		result.output.contains("downloadFilesFromFakeServer")
+		result.task(":tasks").outcome == "SUCCESS"
+	}
+
+	@Test
+	void testTasksWithoutPassword() {
+		buildFile << """
+            ftp {
+				FakeServer {
+					username = "user"
+					host = "localhost"
+					port = 8080
+            
+					downloads {
+						files {
+							remoteDir = "/"
+							localDir = "/"
+						}
+					}
+				}
+            }
+        """
+
+		def result = GradleRunner.create()
+				.withProjectDir(testProjectDir.root)
+				.withArguments('downloadFilesFromFakeServer')
+				.withPluginClasspath()
+		.buildAndFail()
+	}
+
+	@Test
+	void testDownloadDir() {
+		buildFile << """
+            ftp {
+				FakeServer {
+					username = "user"
+					password = "password"
+					host = "localhost"
+					port = 8080
+            
+					downloads {
+						files {
+							remoteDir = "/data"
+							localDir = "."
+						}
+					}
+				}
+            }
+        """
+
+		def result = GradleRunner.create()
+				.withProjectDir(testProjectDir.root)
+				.withArguments('downloadFilesFromFakeServer', '--stacktrace')
+				.withPluginClasspath()
+				.build()
+
+		log.quiet("Output: $result.output")
+		//result.output.contains("downloadFilesFromFakeServer")
+		//result.task(":tasks").outcome == "SUCCESS"
 	}
 
 	@Test

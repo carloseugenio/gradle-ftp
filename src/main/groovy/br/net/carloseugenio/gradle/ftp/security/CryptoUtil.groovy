@@ -87,9 +87,9 @@ class CriptHolder {
 
     void save(String fileName) {
         def ivBase64 = new String(Base64.encoder.encode(iv), "UTF-8")
-        def ciphertextBase64 = new String(Base64.encoder.encode(ciphertext), "UTF-8")
+        def cipherTextBase64 = new String(Base64.encoder.encode(ciphertext), "UTF-8")
         def keyBase64 = new String(Base64.encoder.encode(key), "UTF-8")
-        String vars = "$ivBase64,$ciphertextBase64,$keyBase64"
+        String vars = "$ivBase64,$cipherTextBase64,$keyBase64"
         new File(fileName).write(vars, "UTF-8")
     }
 

@@ -17,6 +17,7 @@ class FtpDownloadDirectoryTask extends DefaultTask {
     @TaskAction
     void executeTask() {
 
+
         // Load the password from secured file
         serverInfo.password = br.net.carloseugenio.gradle.ftp.security.CryptoUtil.loadPassword(serverInfo.username)
 
