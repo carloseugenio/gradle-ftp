@@ -3,6 +3,7 @@ package br.net.carloseugenio.gradle.ftp
 
 import groovy.transform.CompileStatic
 import org.apache.commons.net.ftp.FTP
+import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPSClient
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -64,7 +65,7 @@ class FtpUploadDirectoryTask extends DefaultTask {
  * @throws IOException
  *             if any network or IO error occurred.
  */
-    void uploadDirectory(FTPSClient ftpClient,
+    void uploadDirectory(FTPClient ftpClient,
                                        String remoteDirPath, String localParentDir, String remoteParentDir)
             throws IOException {
 
@@ -126,7 +127,7 @@ class FtpUploadDirectoryTask extends DefaultTask {
         }
     }
 
-    private void createRemoteDir(FTPSClient ftpClient, String remoteFilePath) {
+    private void createRemoteDir(FTPClient ftpClient, String remoteFilePath) {
         // create directory on the server
         println "Creating a directory named: $remoteFilePath on server"
         println "Working directory: " + ftpClient.printWorkingDirectory()
@@ -146,8 +147,8 @@ class FtpUploadDirectoryTask extends DefaultTask {
      * @return true if the file was uploaded successfully, false otherwise
      * @throws IOException if any network or IO error occurred.
      */
-    boolean uploadSingleFile(FTPSClient ftpClient,
-                                             String remoteFilePath, String localPath) throws IOException {
+    boolean uploadSingleFile(FTPClient ftpClient,
+                             String remoteFilePath, String localPath) throws IOException {
         println "Uploading a single file: $localPath to remote path $remoteFilePath ..."
         File uploadFile = new File(localPath)
 

@@ -12,8 +12,9 @@ class Server {
 
     NamedDomainObjectContainer<ResourceSpec> downloads
     NamedDomainObjectContainer<ResourceSpec> uploads
+	boolean useTls
 
-    Server(String name) {
+	Server(String name) {
         this.name = name
     }
 
@@ -31,6 +32,7 @@ class Server {
                 "name='" + name + '\'' +
                 ", host='" + host + '\'' +
                 ", port=" + port +
+                ", useTls=" + useTls +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", downloads=" + downloads +

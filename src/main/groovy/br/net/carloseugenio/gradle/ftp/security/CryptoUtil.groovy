@@ -98,7 +98,6 @@ class CriptHolder {
             throw new IllegalArgumentException("The $fileName does not exist! Please, use secure password task for the server!")
         }
         def vars = new File(fileName).text.split(",")
-        println "Vars: $vars"
         CriptHolder holder = new CriptHolder()
         holder.iv = Base64.decoder.decode(vars[0])
         holder.ciphertext = Base64.decoder.decode(vars[1])

@@ -1,5 +1,7 @@
 package br.net.carloseugenio.gradle.ftp
 
+import br.net.carloseugenio.gradle.ftp.security.CryptoUtil
+import org.apache.commons.net.ftp.FTPReply
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
@@ -18,6 +20,7 @@ import org.mockftpserver.fake.filesystem.UnixFakeFileSystem
 import org.mockftpserver.fake.filesystem.WindowsFakeFileSystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.mockftpserver.core.command.StaticReplyCommandHandler
 
 import static org.junit.Assert.*
 
@@ -27,6 +30,10 @@ class FtpDownloadTest {
 	private Logger log = LoggerFactory.getLogger(getClass())
 	private FakeFtpServer fakeFtpServer
 	File buildFile
+	private String username = "user"
+	private String password = "password"
+	private String destination = "build/test-result/"
+	private String debug = "-q"
 
 	private FileSystem createFileSystem(boolean linux) {
 		if (linux) {
@@ -34,7 +41,6 @@ class FtpDownloadTest {
 		} else {
 			return new WindowsFakeFileSystem()
 		}
-
 	}
 
 	private void makeDirectory(FileSystem fs, String rootPath) {
@@ -49,14 +55,21 @@ class FtpDownloadTest {
 
 	@Before
 	void setup() {
+		new File(destination).deleteDir()
+		assert !new File(destination).exists()
+		new File("user-secure").delete()
+		assert !new File("user-secure").exists()
 		fakeFtpServer = new FakeFtpServer()
 		fakeFtpServer.setServerControlPort(8080)
-		fakeFtpServer.addUserAccount(new UserAccount("user", "password", "c:\\data"))
+		fakeFtpServer.addUserAccount(new UserAccount("user", "password", "/"))
+
 
 		FileSystem fs = createFileSystem(true)
+
 		makeDirectory(fs, "/")
 		addFile(fs, "/data", "file1.txt", "file 1 test data")
 		addFile(fs, "/data", "file2.txt", "file 2 test data")
+		addFile(fs, "/data/subdir", "file3-subdir.txt", "file 3 on sub dir data")
 		fakeFtpServer.setFileSystem(fs)
 
 		fakeFtpServer.start()
@@ -71,6 +84,8 @@ class FtpDownloadTest {
 	@After
 	void tearDown() {
 		fakeFtpServer.stop()
+		new File(destination).deleteDir()
+		new File("user-secure").delete()
 	}
 
 	@Test
@@ -80,19 +95,19 @@ class FtpDownloadTest {
 	}
 
 	@Test
-	void testPrintSourceSetsTaskAdded() {
+	void testApplyPlugin() {
 		Project project = ProjectBuilder.builder().build()
 		project.pluginManager.apply "br.net.carloseugenio.gradle.ftp.gradle-ftp"
-		log.quiet("Tasks: $project.tasks")
+		assert project.plugins.size() == 1
 	}
 
 	@Test
-	void testTasksWithBuildStream() {
+	void testDownloadTasksCreated() {
 		buildFile << """
             ftp {
 				FakeServer {
-					username = "user"
-					password = "password"
+					username = "${username}"
+					password = "${password}"
 					host = "localhost"
 					port = 8080
             
@@ -111,8 +126,6 @@ class FtpDownloadTest {
 				.withArguments('tasks')
 				.withPluginClasspath()
 				.build()
-
-		log.quiet("Output: $result.output")
 		result.output.contains("downloadFilesFromFakeServer")
 		result.task(":tasks").outcome == "SUCCESS"
 	}
@@ -122,7 +135,7 @@ class FtpDownloadTest {
 		buildFile << """
             ftp {
 				FakeServer {
-					username = "user"
+					username = "${username}"
 					host = "localhost"
 					port = 8080
             
@@ -138,62 +151,84 @@ class FtpDownloadTest {
 
 		def result = GradleRunner.create()
 				.withProjectDir(testProjectDir.root)
-				.withArguments('downloadFilesFromFakeServer')
+				.withArguments('downloadFilesFromFakeServer', '--stacktrace', debug)
 				.withPluginClasspath()
 		.buildAndFail()
+		//log.quiet("Output: $result.output")
 	}
 
 	@Test
-	void testDownloadDir() {
+	void testDownloadDirectory() {
 		buildFile << """
             ftp {
 				FakeServer {
-					username = "user"
-					password = "password"
+					username = "${username}"
+					password = "${password}"
 					host = "localhost"
 					port = 8080
             
 					downloads {
 						files {
 							remoteDir = "/data"
-							localDir = "."
+							localDir = "${destination}"
 						}
 					}
 				}
             }
         """
-
+		StaticReplyCommandHandler authHandler = new StaticReplyCommandHandler(FTPReply.SECURITY_MECHANISM_IS_OK, "Static AUTH OK")
+		fakeFtpServer.setCommandHandler("AUTH", authHandler)
+		// Create the user-secure file
+		CryptoUtil.savePassword(username, password)
 		def result = GradleRunner.create()
 				.withProjectDir(testProjectDir.root)
-				.withArguments('downloadFilesFromFakeServer', '--stacktrace')
+				.withArguments('downloadFilesFromFakeServer', '--stacktrace', debug)
 				.withPluginClasspath()
+				.withDebug(true)
 				.build()
 
-		log.quiet("Output: $result.output")
-		//result.output.contains("downloadFilesFromFakeServer")
-		//result.task(":tasks").outcome == "SUCCESS"
+		//log.quiet("Output: $result.output")
+		result.output.contains("downloadFilesFromFakeServer")
+		result.task(":downloadFilesFromFakeServer").outcome == "SUCCESS"
+		assertEquals(3, new File("${destination}/data").listFiles().length)
+		assertEquals(1, new File("${destination}/data/subdir").listFiles().length)
 	}
 
 	@Test
-	void testDownloadDirectory() {
+	void testDownloadFile() {
 
-		//FtpDownloadDirectoryTask task = new FtpDownloadDirectoryTask();
-		Project project = ProjectBuilder.builder().withName("testProject").build()
-		project.plugins.apply(GradleFtpPlugin)
+		buildFile << """
+            ftp {
+				FakeServer {
+					username = "${username}"
+					password = "${password}"
+					host = "localhost"
+					port = 8080
+            
+					downloads {
+						file {
+							remoteFile = "/data/file1.txt"
+							localDir = "${destination}"
+						}
+					}
+				}
+            }
+        """
+		StaticReplyCommandHandler authHandler = new StaticReplyCommandHandler(FTPReply.SECURITY_MECHANISM_IS_OK, "Static AUTH OK")
+		fakeFtpServer.setCommandHandler("AUTH", authHandler)
+		// Create the user-secure file
+		CryptoUtil.savePassword(username, password)
+		def result = GradleRunner.create()
+				.withProjectDir(testProjectDir.root)
+				.withArguments('downloadFileFromFakeServer', '--stacktrace', debug)
+				.withPluginClasspath()
+				.withDebug(true)
+				.build()
 
-		NamedDomainObjectContainer<Server> ftpExtension = project.extensions.findByName(GradleFtpPlugin.FTP_EXTENSION_NAME)
-
-
-		Server serverInfo = new Server("fakeServer")
-		serverInfo.host = "localhost"
-		serverInfo.port = 8080
-		serverInfo.username = "user"
-		serverInfo.password = "password"
-		serverInfo.downloads = new HashSet()
-		def spec = new ResourceSpec("downloadDir")
-		spec.localDir = "."
-		spec.remoteDir = "/data"
-		serverInfo.downloads.add spec
-
+		//log.quiet("Output: $result.output")
+		result.output.contains("downloadFilesFromFakeServer")
+		result.task(":downloadFileFromFakeServer").outcome == "SUCCESS"
+		assertEquals(1, new File("${destination}/data").listFiles().length)
 	}
+
 }
