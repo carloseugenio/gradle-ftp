@@ -12,7 +12,6 @@ import org.gradle.api.logging.Logger
 class FtpClientHelper {
 
     Project project
-    //FTPSClient ftpClient = new FTPSClient(false)
     FTPClient ftpClient
     boolean connected = false
     boolean authenticated = false

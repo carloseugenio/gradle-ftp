@@ -5,15 +5,10 @@ import groovy.transform.CompileStatic
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.net.ftp.FTPFile
-import org.apache.commons.net.ftp.FTPSClient
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-
-import javax.inject.Inject
 
 @CompileStatic
 class FtpDownloadDirectoryTask extends DefaultTask {
