@@ -10,6 +10,9 @@ plugins {
 	id 'idea'
 }
 
+group 'br.net.carloseugenio.gradle'
+version '0.0.1-SNAPSHOT'
+
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
@@ -66,7 +69,7 @@ def pomConfig = {
     developers {
         developer {
             id "carloseugenio"
-            name "Carlos Eugenio P Purificacao"
+            name "Carlos Eugenio P. da Purificacao"
             email "carloseugenio@gmail.com"
         }
     }
@@ -77,7 +80,24 @@ def pomConfig = {
 }
 
 publishing {
+	repositories {
+		ivy {
+			name "IvyPublicationRepo"
+			url "file://opt/ivyRep"
+			layout "maven"
+		}
+	}
     publications {
+		ivy(IvyPublication) {
+			from components.java
+			artifact(sourcesJar) {
+				type = 'sources'
+				conf = 'compile'
+			}
+			descriptor.description {
+				text = description
+			}
+		}
         mavenPublication(MavenPublication) {
             from components.java
             artifact sourcesJar {
@@ -86,9 +106,10 @@ publishing {
             artifact javadocJar {
                 classifier "javadoc"
             }
+			//br.net.carloseugenio.gradle.ftp.gradle-ftp
             groupId 'br.net.carloseugenio.gradle'
-            artifactId 'ftp'
-            version '0.0.1'
+            artifactId 'gradle-ftp'
+            version '0.0.1-SNAPSHOT'
             pom.withXml {
                 def root = asNode()
                 root.appendNode('description', 'A gradle plugin for interacting with FTP servers.')
