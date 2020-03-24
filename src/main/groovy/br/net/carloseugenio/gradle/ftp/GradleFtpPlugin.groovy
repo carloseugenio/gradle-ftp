@@ -11,6 +11,7 @@ class GradleFtpPlugin implements Plugin<Project> {
 	static final FTP_EXTENSION_NAME = "ftp"
 	private static final String DOWNLOAD_TASK_PATTERN = 'download%sFrom%s'
     private static final String UPLOAD_TASK_PATTERN = 'upload%sTo%s'
+	private static final String LIST_TASK_PATTERN = 'list%sDir%s'
 	private static final String SECURE_SERVER_PASSWORD_PATTERN = 'secure%sPassword'
 	private static final String TASK_GROUP_NAME = "Gradle FTP Plugin"
 
@@ -47,6 +48,7 @@ class GradleFtpPlugin implements Plugin<Project> {
 			// NamedDomainObjectContainer for ResourceSpec objects.
 			it.downloads = project.container(ResourceSpec)
             it.uploads = project.container(ResourceSpec)
+			it.list = project.container(ResourceSpec)
 		}
 
 		// Use FTP as the name in the build script to define
@@ -80,6 +82,10 @@ class GradleFtpPlugin implements Plugin<Project> {
                 def resourceSpec = delegate
                 createFtpUploadTask(project, resourceSpec, serverInfo)
             }
+			it.list.all {
+                def resourceSpec = delegate
+                createListDirTask(project, resourceSpec, serverInfo)
+			}
 			createSecureServerPasswordTask(project, serverInfo)
 		}
 	}
@@ -136,4 +142,25 @@ class GradleFtpPlugin implements Plugin<Project> {
             }
         }
     }
+
+    private void createListDirTask(project, resourceSpec, serverInfo) {
+        // Make list and server names pretty for use in task name.
+        def taskName =
+                String.format(
+                        LIST_TASK_PATTERN,
+                        resourceSpec.name.capitalize(),
+                        serverInfo.name.capitalize())
+
+        project.afterEvaluate {
+            // Create new task for this node.
+            project.task(taskName, type: FtpListDirectoryTask) {
+                description = "List local file/directory ['${resourceSpec.localSpec()}'] to server '${serverInfo.name}'"
+                group = TASK_GROUP_NAME
+
+                it.serverInfo = serverInfo
+                it.listInfo = resourceSpec
+            }
+        }
+    }
+
 }

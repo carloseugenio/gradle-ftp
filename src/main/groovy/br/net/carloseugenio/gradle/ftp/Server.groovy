@@ -12,6 +12,8 @@ class Server {
 
     NamedDomainObjectContainer<ResourceSpec> downloads
     NamedDomainObjectContainer<ResourceSpec> uploads
+    NamedDomainObjectContainer<ResourceSpec> list
+
 	boolean useTls
 
 	Server(String name) {
@@ -24,6 +26,10 @@ class Server {
 
     def uploads(final Closure configureClosure) {
         uploads.configure(configureClosure)
+    }
+
+    def list(final Closure configureClosure) {
+        list.configure(configureClosure)
     }
 
     @Override
